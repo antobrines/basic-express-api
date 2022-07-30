@@ -4,35 +4,30 @@ const {
 } = require('../utils/message');
 const config = require('../config');
 const jwt = require('jsonwebtoken');
-
-
+const constant = require('../config/constant');
+const userError = constant.user.error;
 
 const isConnected = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const {
+    authHeader
+  } = req.headers;
+
   if (authHeader) {
     const token = authHeader.split(' ')[1];
 
     jwt.verify(token, config.token.secret, (error, user) => {
       if (error) {
-        return errorF('Vous n\'êtes pas connecté', error, httpStatus.UNAUTHORIZED, res, next);
+        return errorF(userError.notConnected, error, httpStatus.UNAUTHORIZED, res, next);
       }
       req.user = user;
-      next();
+      return next();
     });
-  } else {
-    const err = new Error('Il semblerait qu\'il manque le token');
-    errorF(err.message, err, httpStatus.UNAUTHORIZED, res, next);
   }
+
+  const error = new Error(userError.missingToken);
+  return errorF(error.message, error, httpStatus.UNAUTHORIZED, res, next);
+
 };
-
-// const isMine = (schema) => async (req, res, next) => {
-//   const userId = req.user.userId;
-
-// };
-
-// const isAdmin = async (req, res, next) => {
-//   const roles = req.user.roles;
-// };
 
 module.exports = {
   isConnected

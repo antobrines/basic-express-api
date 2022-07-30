@@ -5,19 +5,22 @@ const {
   errorF,
   successF
 } = require('../utils/message');
+const constant = require('../config/constant');
+const userError = constant.user.error;
+const userSuccess = constant.user.success;
 
 const register = catchAsync(async (req, res, next) => {
   const userCreated = await userService.create(req.body);
-  successF('User Created', userCreated, 200, res, next);
+  successF(userSuccess.connected, userCreated, 200, res, next);
 });
 
 const login = catchAsync(async (req, res, next) => {
   const varLogged = await userService.login(req);
   if (varLogged == 'Invalid Credentiel') {
-    const error = new Error('L\'adresse mail ou le mot de passe est invalide');
+    const error = new Error(userError.wrongCredentiel);
     errorF(error.message, error, httpStatus.BAD_REQUEST, res, next);
   } else {
-    successF('La connexion à bien été effectué', varLogged, 200, res, next);
+    successF(userSuccess.connected, varLogged, 200, res, next);
   }
 });
 
